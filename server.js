@@ -29,7 +29,7 @@ const rateLimiter = rateLimit({
 app.use(rateLimiter);
 
 mongoose
-  .connect(process.env.MONGO_URL, { useNewUrlParser: true })
+  .connect("mongodb+srv://yusifdhrgam:Qwertly123@cluster0.t9peqde.mongodb.net/test", { useNewUrlParser: true })
   .then(() => console.log("MongoDB Connected"))
   .catch((err) => console.log(err));
 
@@ -57,7 +57,7 @@ io.on('connection', (socket) => {
   
   socket.on('authenticate', async (token) => {
     try {
-        const decoded = jwt.verify(token, process.env.JWT_SECRET);
+        const decoded = jwt.verify(token, "1234567890");
         currentUserId = decoded.id;
         clients[currentUserId] = socket;
 
@@ -94,7 +94,7 @@ io.on('connection', (socket) => {
   });
 });
 
-server.listen(8080, () => console.log("Server running on port 3000"));
+server.listen(3000, () => console.log("Server running on port 3000"));
 server.on('error', (error) => {
   console.error('Server Error:', error);
 });
