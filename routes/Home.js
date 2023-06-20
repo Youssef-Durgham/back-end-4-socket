@@ -514,6 +514,7 @@ const locations = {};
 
 wss.on('connection', (ws) => {
     let currentUserId = null;
+    let locationInterval = null;
 
     ws.on('message', async (message) => {
         try {
@@ -528,7 +529,6 @@ wss.on('connection', (ws) => {
                 if (user.role === 'captain') {
                     await Users.findByIdAndUpdate(currentUserId, { captain: true });
                 } else if(user.role === 'user') {
-                    // find the last not cancelled order for this user
                     const order = await TaxiOrder.find(
                         { $or: [
                             { 'user': user._id }, 
@@ -542,7 +542,12 @@ wss.on('connection', (ws) => {
                     if(order && order.length > 0 && order[0].captain) {
                         const captain = order[0].captain;
 
-                        setInterval(() => {
+                        if (locations[captain._id]) {
+                            const locationData = JSON.stringify({ event: `location/${captain._id}`, data: locations[captain._id]});
+                            ws.send(locationData);
+                        }
+
+                        locationInterval = setInterval(() => {
                             if(clients[captain._id] && locations[captain._id]) {
                                 const locationData = JSON.stringify({ event: `location/${captain._id}`, data: locations[captain._id]});
                                 ws.send(locationData);
@@ -563,14 +568,16 @@ wss.on('connection', (ws) => {
     });
   
     ws.on('close', async () => {
-      if(currentUserId) {
-        if (currentUserId in clients) {
-          await Users.findByIdAndUpdate(currentUserId, { captain: false });
+        if(currentUserId) {
+            if (currentUserId in clients) {
+                await Users.findByIdAndUpdate(currentUserId, { captain: false });
+            }
+            delete clients[currentUserId];
+            delete locations[currentUserId];
+            if(locationInterval) {
+                clearInterval(locationInterval);
+            }
         }
-    
-        delete clients[currentUserId];
-        delete locations[currentUserId];
-      }
     });    
 });
 
