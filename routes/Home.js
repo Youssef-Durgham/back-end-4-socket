@@ -8,7 +8,7 @@ const nodemailer = require("nodemailer");
 const admin = require("firebase-admin");
 const mongoose = require('mongoose');
 const WebSocket = require('ws');
-const jwtSecret = process.env.JWT_SECRET; // replace with your JWT secret
+const jwtSecret = "1234567890"; // replace with your JWT secret
 
 const wss = new WebSocket.Server({ port: 8080 });
 
