@@ -150,6 +150,10 @@ const UserSchema = new mongoose.Schema({
     type: Boolean,
     default: false,
   },
+  captain: {
+    type: Boolean,
+    default: false,
+  },
 });
 
 UserSchema.index({ location: "2dsphere" });

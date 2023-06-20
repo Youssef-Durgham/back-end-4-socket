@@ -525,7 +525,9 @@ wss.on('connection', (ws) => {
                 clients[currentUserId] = ws;
                 const user = await Users.findById(currentUserId);
                 
-                if (user.role === 'user') {
+                if (user.role === 'captain') {
+                    await Users.findByIdAndUpdate(currentUserId, { captain: true });
+                } else if(user.role === 'user') {
                     // find the last not cancelled order for this user
                     const order = await TaxiOrder.find(
                         { $or: [
@@ -560,12 +562,16 @@ wss.on('connection', (ws) => {
         }
     });
   
-    ws.on('close', () => {
-        if(currentUserId) {
-            delete clients[currentUserId];
-            delete locations[currentUserId];
+    ws.on('close', async () => {
+      if(currentUserId) {
+        if (currentUserId in clients) {
+          await Users.findByIdAndUpdate(currentUserId, { captain: false });
         }
-    });
+    
+        delete clients[currentUserId];
+        delete locations[currentUserId];
+      }
+    });    
 });
 
 
